@@ -13,6 +13,8 @@ add_executable(
     src/device/TransportDetector.cpp
     src/health/SMARTInfo.cpp
     src/health/SMARTReader.cpp
+    src/erase/EraseMethod.cpp
+    src/erase/EraseExecutor.cpp
     src/device/Device.cpp
     src/health/SMARTParser.cpp
     src/health/HealthManager.cpp
