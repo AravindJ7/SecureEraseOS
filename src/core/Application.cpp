@@ -2,12 +2,13 @@
 
 #include <iostream>
 
+#include "device/DeviceManager.hpp"
+
 void Application::run()
 {
     initialize();
 
-    std::cout
-        << "\nApplication Started Successfully.\n";
+    scanDevices();
 
     shutdown();
 }
@@ -18,17 +19,32 @@ void Application::initialize()
         << "=================================\n";
 
     std::cout
-        << " SecureEraseOS v0.1\n";
+        << " SecureEraseOS v0.2\n";
 
     std::cout
         << "=================================\n\n";
+}
 
+void Application::scanDevices()
+{
     std::cout
-        << "Initializing...\n";
+        << "Scanning storage devices...\n\n";
+
+    DeviceManager manager;
+
+    auto devices =
+        manager.scanDevices();
+
+    for(const auto& device : devices)
+    {
+        device.printInfo();
+
+        std::cout << "\n";
+    }
 }
 
 void Application::shutdown()
 {
     std::cout
-        << "\nApplication Closed.\n";
+        << "Application Finished.\n";
 }

@@ -9,7 +9,10 @@ include_directories(include)
 
 add_executable(
     secureos
-
+    src/device/DeviceInfoReader.cpp
+    src/device/Device.cpp
+    src/device/DeviceManager.cpp
+    src/device/DeviceScanner.cpp
     src/main.cpp
     src/core/Application.cpp
 )
