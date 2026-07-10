@@ -10,7 +10,11 @@ public:
 private:
 
     void initialize();
+
     void scanDevices();
+
+    void showDeviceHealth();
+
     void shutdown();
 };
 

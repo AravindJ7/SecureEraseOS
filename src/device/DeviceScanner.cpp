@@ -1,6 +1,8 @@
 #include "device/DeviceScanner.hpp"
 #include "device/DeviceInfoReader.hpp"
 #include <filesystem>
+#include "device/TransportDetector.hpp"
+#include "device/DeviceClassifier.hpp"
 
 namespace fs = std::filesystem;
 
@@ -9,6 +11,8 @@ DeviceScanner::scan()
 {
     std::vector<Device> devices;
     DeviceInfoReader reader;
+    DeviceClassifier classifier;
+    TransportDetector transport;    
     for(const auto& entry :
         fs::directory_iterator("/sys/block"))
     {
@@ -34,6 +38,8 @@ DeviceScanner::scan()
         device.path =
             "/dev/" + name;
         reader.populate(device);
+        classifier.classify(device);
+        transport.detect(device);
         devices.push_back(device);
     }
 

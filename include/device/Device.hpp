@@ -5,6 +5,14 @@
 #include <cstdint>
 
 #include "device/DeviceType.hpp"
+enum class TransportType
+{
+    NVME,
+    SATA,
+    USB,
+    VIRTUAL,
+    UNKNOWN
+};
 
 class Device
 {
@@ -17,7 +25,8 @@ public:
     std::string model;
     std::string serial;
 
-    DeviceType type;
+    DeviceType type;    
+    TransportType transport;
 
     uint64_t capacity;
 
