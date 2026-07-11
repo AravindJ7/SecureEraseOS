@@ -10,6 +10,8 @@ include_directories(include)
 add_executable(
     secureos
     src/device/DeviceInfoReader.cpp
+    src/executor/CommandResult.cpp
+    src/executor/CommandRunner.cpp
     src/erase/EraseManager.cpp
     src/device/TransportDetector.cpp
     src/health/SMARTInfo.cpp
