@@ -7,13 +7,13 @@
 
 void Application::run()
 {
-    initialize();
+initialize();
 
 scanDevices();
 
 selectDevice();
 
-showDeviceHealth();
+showMainMenu();
 
 shutdown();
 }
@@ -169,4 +169,109 @@ void Application::selectDevice()
         << "\nSelected : "
         << selectedDevice.model
         << "\n";
+}
+void Application::showMainMenu()
+{
+    while(true)
+    {
+        int choice;
+
+        std::cout
+            << "\n=================================\n";
+
+        std::cout
+            << " SecureEraseOS Main Menu\n";
+
+        std::cout
+            << "=================================\n\n";
+
+        std::cout
+            << "Current Device : "
+            << selectedDevice.model
+            << "\n\n";
+
+        std::cout
+            << "1. Device Information\n";
+        std::cout
+            << "2. Device Health\n";
+        std::cout
+            << "3. Secure Erase\n";
+        std::cout
+            << "4. Verify Erase\n";
+        std::cout
+            << "5. Generate Report\n";
+        std::cout
+            << "6. Change Device\n";
+        std::cout
+            << "7. Exit\n\n";
+
+        std::cout
+            << "Choice : ";
+
+        std::cin >> choice;
+
+        switch(choice)
+        {
+            case 1:
+                deviceInformation();
+                break;
+
+            case 2:
+                showDeviceHealth();
+                break;
+
+            case 3:
+                eraseDevice();
+                break;
+
+            case 4:
+                verifyErase();
+                break;
+
+            case 5:
+                generateReport();
+                break;
+
+            case 6:
+                changeDevice();
+                break;
+
+            case 7:
+                return;
+
+            default:
+                std::cout
+                    << "\nInvalid option.\n";
+        }
+    }
+}
+void Application::deviceInformation()
+{
+    std::cout << "\n";
+    selectedDevice.printInfo();
+    std::cout << "\n";
+}
+
+void Application::eraseDevice()
+{
+    EraseManager manager;
+
+    manager.start(selectedDevice);
+}
+
+void Application::verifyErase()
+{
+    std::cout
+        << "\nVerify Erase (Coming Soon)\n";
+}
+
+void Application::generateReport()
+{
+    std::cout
+        << "\nGenerate Report (Coming Soon)\n";
+}
+
+void Application::changeDevice()
+{
+    selectDevice();
 }

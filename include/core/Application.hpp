@@ -30,6 +30,15 @@ private:
     void eraseDevice();
 
     void shutdown();
+    void showMainMenu();
+
+void deviceInformation();
+
+void verifyErase();
+
+void generateReport();
+
+void changeDevice();
 };
 
 #endif
