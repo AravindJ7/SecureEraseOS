@@ -3,13 +3,28 @@
 #include <array>
 #include <cstdio>
 
-std::string SMARTReader::read(
+std::string
+SMARTReader::read(
     const std::string& device)
 {
-    std::string command =
-        "nvme smart-log " +
-        device +
-        " 2>/dev/null";
+    std::string command;
+
+    // NVMe Device
+    if(device.find("nvme") != std::string::npos)
+    {
+        command =
+            "nvme smart-log " +
+            device +
+            " 2>/dev/null";
+    }
+    // SATA / HDD / USB
+    else
+    {
+        command =
+            "smartctl -a " +
+            device +
+            " 2>/dev/null";
+    }
 
     std::array<char,256> buffer;
 
@@ -18,8 +33,10 @@ std::string SMARTReader::read(
     FILE* pipe =
         popen(command.c_str(),"r");
 
-    if(!pipe)
+    if(pipe == nullptr)
+    {
         return "";
+    }
 
     while(fgets(buffer.data(),
                 buffer.size(),

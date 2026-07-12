@@ -8,7 +8,7 @@
 
 #include "executor/CommandResult.hpp"
 
-class EraseExecutor
+class EraseExecutor 
 {
 public:
 
@@ -17,6 +17,11 @@ public:
         EraseMethod method);
 
     CommandResult preview(
+        const Device& device,
+        EraseMethod method);
+        
+
+    CommandResult execute(
         const Device& device,
         EraseMethod method);
 

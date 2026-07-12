@@ -2,7 +2,8 @@
 #include "erase/EraseManager.hpp"
 #include <iostream>
 #include "verify/VerifyManager.hpp"
-
+#include "report/ReportManager.hpp"
+#include "verify/VerifyEngine.hpp"
 #include "device/DeviceManager.hpp"
 #include "health/HealthManager.hpp"
 
@@ -187,9 +188,17 @@ void Application::showMainMenu()
             << "=================================\n\n";
 
         std::cout
-            << "Current Device : "
-            << selectedDevice.model
-            << "\n\n";
+    << "Current Device : "
+    << selectedDevice.model
+    << "\n";
+
+std::cout
+    << "Last Erase Method : "
+    << lastEraseMethod
+    << "\n";
+
+std::cout
+    << "Mode : Simulation\n\n";
 
         std::cout
             << "1. Device Information\n";
@@ -255,9 +264,23 @@ void Application::deviceInformation()
 
 void Application::eraseDevice()
 {
+    if(!deviceSelected)
+    {
+        std::cout
+            << "\nNo device selected.\n";
+
+        return;
+    }
+
     EraseManager manager;
 
     manager.start(selectedDevice);
+
+    lastEraseStatus =
+        manager.getStatus();
+
+    lastEraseMethod =
+        manager.getMethod();
 }
 
 void Application::verifyErase()
@@ -273,12 +296,29 @@ void Application::verifyErase()
     VerifyManager manager;
 
     manager.start(selectedDevice);
+  
 }
 
 void Application::generateReport()
 {
-    std::cout
-        << "\nGenerate Report (Coming Soon)\n";
+    if(!deviceSelected)
+    {
+        std::cout
+            << "\nNo device selected.\n";
+
+        return;
+    }
+
+    VerifyEngine engine;
+
+    VerifyResult verifyResult =
+        engine.verify(selectedDevice);
+
+    ReportManager manager;
+
+    manager.generate(
+        selectedDevice,
+        verifyResult);
 }
 
 void Application::changeDevice()

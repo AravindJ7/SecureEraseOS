@@ -53,4 +53,22 @@ add_executable(
     src/verify/VerifyResult.cpp
     src/verify/VerifyEngine.cpp
     src/verify/VerifyManager.cpp
+    src/ui/ProgressBar.cpp
+    src/log/Logger.cpp
+    # ==========================
+# Report
+# ==========================
+src/report/Report.cpp
+src/report/ReportGenerator.cpp
+src/report/ReportManager.cpp
+# ==========================
+# Safety
+# ==========================
+src/safety/SafetyResult.cpp
+src/safety/SafetyChecker.cpp
+# ==========================
+# IO
+# ==========================
+src/io/Buffer.cpp
+src/io/DeviceIO.cpp
 )

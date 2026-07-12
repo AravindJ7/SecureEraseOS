@@ -1,12 +1,22 @@
 #include "erase/EraseManager.hpp"
 
+#include <chrono>
 #include <iostream>
+#include <thread>
 
 #include "erase/EraseExecutor.hpp"
 #include "erase/EraseMethod.hpp"
+#include "executor/CommandResult.hpp"
+#include "log/Logger.hpp"
+#include "safety/SafetyChecker.hpp"
+#include "safety/SafetyResult.hpp"
+#include "ui/ProgressBar.hpp"
 
 void EraseManager::start(const Device& device)
 {
+    status = EraseStatus::NOT_STARTED;
+    method = "None";
+
     std::cout
         << "\n=================================\n";
 
@@ -27,7 +37,36 @@ void EraseManager::start(const Device& device)
         << device.path
         << "\n\n";
 
-    EraseMethod method =
+    SafetyChecker checker;
+
+    SafetyResult safety =
+        checker.check(device);
+
+    if(!safety.safe)
+    {
+        std::cout
+            << "\n=================================\n";
+
+        std::cout
+            << " Safety Check Failed\n";
+
+        std::cout
+            << "=================================\n\n";
+
+        for(const auto& reason : safety.reasons)
+        {
+            std::cout
+                << "- "
+                << reason
+                << "\n";
+        }
+
+        status = EraseStatus::FAILED;
+
+        return;
+    }
+
+    EraseMethod eraseMethod =
         EraseMethod::NONE;
 
     if(device.type == DeviceType::NVME_SSD)
@@ -49,13 +88,28 @@ void EraseManager::start(const Device& device)
         std::cin >> choice;
 
         if(choice == 1)
-            method = EraseMethod::NVME_SANITIZE;
+        {
+            eraseMethod =
+                EraseMethod::NVME_SANITIZE;
 
+            method =
+                "NVMe Sanitize";
+        }
         else if(choice == 2)
-            method = EraseMethod::NVME_FORMAT;
+        {
+            eraseMethod =
+                EraseMethod::NVME_FORMAT;
 
+            method =
+                "NVMe Format";
+        }
         else
+        {
+            status =
+                EraseStatus::CANCELLED;
+
             return;
+        }
     }
     else if(device.type == DeviceType::HDD)
     {
@@ -73,15 +127,28 @@ void EraseManager::start(const Device& device)
         std::cin >> choice;
 
         if(choice == 1)
-            method = EraseMethod::SOFTWARE_OVERWRITE;
+        {
+            eraseMethod =
+                EraseMethod::SOFTWARE_OVERWRITE;
 
+            method =
+                "Software Overwrite";
+        }
         else
+        {
+            status =
+                EraseStatus::CANCELLED;
+
             return;
+        }
     }
     else
     {
         std::cout
             << "No erase method available.\n";
+
+        status =
+            EraseStatus::FAILED;
 
         return;
     }
@@ -97,30 +164,151 @@ void EraseManager::start(const Device& device)
     std::cout
         << "Type YES to continue : ";
 
-    std::cin
-        >> confirm;
+    std::cin >> confirm;
 
     if(confirm != "YES")
     {
         std::cout
             << "\nCancelled.\n";
 
+        status =
+            EraseStatus::CANCELLED;
+
         return;
     }
 
     EraseExecutor executor;
 
-
-    CommandResult result =
-    executor.preview(
-        device,
-        method);
-
-std::cout
-    << "\n"
-    << result.output
-    << "\n";
+    CommandResult preview =
+        executor.preview(
+            device,
+            eraseMethod);
 
     std::cout
-    << "\nPreview completed successfully.\n";
+        << "\n"
+        << preview.output
+        << "\n";
+
+    std::cout
+        << "\nPreview completed successfully.\n";
+
+    std::cout
+        << "\nExecute this command?\n\n";
+
+    std::cout
+        << "1. Yes\n";
+
+    std::cout
+        << "2. No\n\n";
+
+    std::cout
+        << "Choice : ";
+
+    int executeChoice;
+
+    std::cin >> executeChoice;
+
+    if(executeChoice != 1)
+    {
+        status =
+            EraseStatus::CANCELLED;
+
+        std::cout
+            << "\nOperation Cancelled.\n";
+
+        return;
+    }
+
+    ProgressBar bar;
+
+    for(int i = 0; i <= 100; i += 10)
+    {
+        bar.show(i);
+
+        std::this_thread::sleep_for(
+            std::chrono::milliseconds(200));
+    }
+
+    auto startTime =
+        std::chrono::steady_clock::now();
+
+    CommandResult execution =
+        executor.execute(
+            device,
+            eraseMethod);
+
+    auto endTime =
+        std::chrono::steady_clock::now();
+
+    auto seconds =
+        std::chrono::duration_cast
+        <
+            std::chrono::seconds
+        >(endTime - startTime);
+
+    if(execution.success)
+    {
+        status =
+            EraseStatus::SUCCESS;
+    }
+    else
+    {
+        status =
+            EraseStatus::FAILED;
+    }
+
+    Logger logger;
+
+    logger.write(
+        "Device : " + device.path +
+        "\nVendor : " + device.vendor +
+        "\nModel : " + device.model +
+        "\nMethod : " + method +
+        "\nExit Code : " +
+        std::to_string(execution.exitCode) +
+        "\nExecution Time : " +
+        std::to_string(seconds.count()) +
+        " sec" +
+        "\nStatus : " +
+        (execution.success ? "SUCCESS" : "FAILED"));
+
+    std::cout
+        << "\n=================================\n";
+
+    std::cout
+        << " Execution Result\n";
+
+    std::cout
+        << "=================================\n\n";
+
+    std::cout
+        << execution.output
+        << "\n";
+
+    std::cout
+        << "Exit Code : "
+        << execution.exitCode
+        << "\n";
+
+    std::cout
+        << "Execution Time : "
+        << seconds.count()
+        << " sec\n";
+
+    std::cout
+        << "Status : "
+        << (execution.success ? "SUCCESS" : "FAILED")
+        << "\n";
+}
+
+EraseStatus
+EraseManager::getStatus() const
+{
+    return status;
+}
+
+std::string
+EraseManager::getMethod() const
+{
+    return method;
 }
