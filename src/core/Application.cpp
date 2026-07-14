@@ -1,6 +1,9 @@
 #include "core/Application.hpp"
+#include <limits>      // <-- Add this
+
 #include "erase/EraseManager.hpp"
 #include <iostream>
+#include <cstdlib>
 #include "verify/VerifyManager.hpp"
 #include "report/ReportManager.hpp"
 #include "verify/VerifyEngine.hpp"
@@ -121,56 +124,57 @@ void Application::selectDevice()
 {
     if(devices.empty())
     {
-        std::cout
-            << "\nNo storage devices found.\n";
-
+        std::cout << "\nNo storage devices found.\n";
         return;
     }
 
-    std::cout
-        << "\n=================================\n";
-
-    std::cout
-        << " Select Device\n";
-
-    std::cout
-        << "=================================\n\n";
-
-    for(size_t i = 0; i < devices.size(); i++)
+    while(true)
     {
         std::cout
-            << i + 1
-            << ". "
-            << devices[i].model
-            << " ("
-            << devices[i].path
-            << ")\n";
-    }
+            << "\n=================================\n"
+            << " Select Device\n"
+            << "=================================\n\n";
 
-    std::cout
-        << "\nChoice : ";
+        for(size_t i = 0; i < devices.size(); i++)
+        {
+            std::cout
+                << i + 1
+                << ". "
+                << devices[i].model
+                << " ("
+                << devices[i].path
+                << ")\n";
+        }
 
-    int choice;
+        std::cout << "\nChoice : ";
 
-    std::cin >> choice;
+        int choice;
 
-    if(choice < 1 || choice > static_cast<int>(devices.size()))
-    {
+        if(!(std::cin >> choice))
+        {
+            std::cin.clear();
+            std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+
+            std::cout << "\nInvalid input. Please enter a number.\n";
+            continue;
+        }
+
+        if(choice < 1 || choice > static_cast<int>(devices.size()))
+        {
+            std::cout << "\nInvalid Selection.\n";
+            continue;
+        }
+
+        selectedDevice = devices[choice - 1];
+        deviceSelected = true;
+
         std::cout
-            << "\nInvalid Selection\n";
+            << "\nSelected : "
+            << selectedDevice.model
+            << "\n";
 
-        return;
+        break;
     }
-
-    selectedDevice =
-        devices[choice - 1];
-
-    deviceSelected = true;
-
-    std::cout
-        << "\nSelected : "
-        << selectedDevice.model
-        << "\n";
 }
 void Application::showMainMenu()
 {
@@ -197,8 +201,7 @@ std::cout
     << lastEraseMethod
     << "\n";
 
-std::cout
-    << "Mode : Simulation\n\n";
+std::cout<< "Real execution mode"<<"\n";
 
         std::cout
             << "1. Device Information\n";
@@ -218,7 +221,18 @@ std::cout
         std::cout
             << "Choice : ";
 
-        std::cin >> choice;
+  if (!(std::cin >> choice))
+{
+    std::cout << "\nDEBUG: cin failed\n";
+
+    std::cin.clear();
+    std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+
+    std::cout << "Invalid option.\n";
+    continue;
+}
+
+std::cout << "DEBUG: choice = " << choice << "\n";
 
         switch(choice)
         {
@@ -247,7 +261,13 @@ std::cout
                 break;
 
             case 7:
-                return;
+                {
+                  std::cout
+                     << "\nShutting down SecureEraseOS...\n";
+
+                     std::system("/sbin/poweroff -f");
+                    return;
+                }
 
             default:
                 std::cout

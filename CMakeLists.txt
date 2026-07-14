@@ -72,3 +72,5 @@ src/safety/SafetyChecker.cpp
 src/io/Buffer.cpp
 src/io/DeviceIO.cpp
 )
+install(TARGETS secureos
+        RUNTIME DESTINATION /usr/bin)

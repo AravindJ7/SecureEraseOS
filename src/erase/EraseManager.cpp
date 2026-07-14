@@ -111,37 +111,47 @@ void EraseManager::start(const Device& device)
             return;
         }
     }
-    else if(device.type == DeviceType::HDD)
+    else if(
+    device.type == DeviceType::HDD ||
+    device.type == DeviceType::USB)
+{
+    std::cout
+        << "1. Software Overwrite\n";
+
+    std::cout
+        << "2. Cancel\n\n";
+
+    int choice;
+
+    std::cout
+        << "Choice : ";
+
+    std::cin >> choice;
+
+    if(choice == 1)
     {
-        std::cout
-            << "1. Software Overwrite\n";
+        eraseMethod =
+            EraseMethod::SOFTWARE_OVERWRITE;
 
-        std::cout
-            << "2. Cancel\n\n";
-
-        int choice;
-
-        std::cout
-            << "Choice : ";
-
-        std::cin >> choice;
-
-        if(choice == 1)
+        if(device.type == DeviceType::USB)
         {
-            eraseMethod =
-                EraseMethod::SOFTWARE_OVERWRITE;
-
             method =
-                "Software Overwrite";
+                "USB Software Overwrite";
         }
         else
         {
-            status =
-                EraseStatus::CANCELLED;
-
-            return;
+            method =
+                "Software Overwrite";
         }
     }
+    else
+    {
+        status =
+            EraseStatus::CANCELLED;
+
+        return;
+    }
+}
     else
     {
         std::cout

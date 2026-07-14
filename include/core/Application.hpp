@@ -20,7 +20,6 @@ private:
     Device selectedDevice;
 
     bool deviceSelected = false;
-
     EraseStatus lastEraseStatus =
         EraseStatus::NOT_STARTED;
 

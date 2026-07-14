@@ -1,5 +1,6 @@
 #include "erase/EraseExecutor.hpp"
 
+#include "config/Config.hpp"
 #include "executor/CommandRunner.hpp"
 #include "executor/ExecutionMode.hpp"
 
@@ -12,33 +13,88 @@ EraseExecutor::buildCommand(
     {
         case EraseMethod::NVME_SANITIZE:
 
-            return "echo \"[SIMULATION] NVMe Sanitize would execute on "
-                   + device.path + "\"";
+            if(SIMULATION_MODE)
+            {
+                return
+                    "echo \"[SIMULATION] nvme sanitize "
+                    + device.path +
+                    " --sanact=start-block-erase\"";
+            }
+
+            return
+                "nvme sanitize " +
+                device.path +
+                " --sanact=start-block-erase";
 
         case EraseMethod::NVME_FORMAT:
 
-            return "echo \"[SIMULATION] NVMe Format would execute on "
-                   + device.path + "\"";
+            if(SIMULATION_MODE)
+            {
+                return
+                    "echo \"[SIMULATION] nvme format "
+                    + device.path +
+                    "\"";
+            }
+
+            return
+                "nvme format " +
+                device.path;
 
         case EraseMethod::ATA_SECURE_ERASE:
 
-            return "echo \"[SIMULATION] ATA Secure Erase would execute on "
-                   + device.path + "\"";
+            if(SIMULATION_MODE)
+            {
+                return
+                    "echo \"[SIMULATION] hdparm --security-erase password "
+                    + device.path +
+                    "\"";
+            }
+
+            return
+                "hdparm --user-master u --security-set-pass password " +
+                device.path +
+                " && hdparm --user-master u --security-erase password " +
+                device.path;
 
         case EraseMethod::ATA_ENHANCED:
 
-            return "echo \"[SIMULATION] ATA Enhanced Secure Erase would execute on "
-                   + device.path + "\"";
+            if(SIMULATION_MODE)
+            {
+                return
+                    "echo \"[SIMULATION] hdparm --security-erase-enhanced password "
+                    + device.path +
+                    "\"";
+            }
+
+            return
+                "hdparm --user-master u --security-set-pass password " +
+                device.path +
+                " && hdparm --user-master u --security-erase-enhanced password " +
+                device.path;
 
         case EraseMethod::SOFTWARE_OVERWRITE:
 
-            return "echo \"[SIMULATION] shred -v -n 3 "
-                   + device.path +
-                   "\"";
+            if(SIMULATION_MODE)
+            {
+                return
+                    "echo \"[SIMULATION] shred -v -n 3 "
+                    + device.path +
+                    "\"";
+            }
+
+            return
+                "shred -v -n 3 " +
+                device.path;
 
         default:
 
-            return "echo \"[SIMULATION] Unknown erase method.\"";
+            if(SIMULATION_MODE)
+            {
+                return
+                    "echo \"[SIMULATION] Unknown erase method.\"";
+            }
+
+            return "";
     }
 }
 

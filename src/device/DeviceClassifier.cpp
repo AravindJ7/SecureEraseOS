@@ -20,24 +20,48 @@ void DeviceClassifier::classify(Device& device)
 {
     if(device.name.rfind("nvme", 0) == 0)
     {
-        device.type = DeviceType::NVME_SSD;
+        device.type =
+            DeviceType::NVME_SSD;
+
         return;
     }
 
     std::string rotational =
-        readFile("/sys/block/" +
-                 device.name +
-                 "/queue/rotational");
+        readFile(
+            "/sys/block/" +
+            device.name +
+            "/queue/rotational");
 
-    if(device.name.rfind("sd", 0) == 0)
+    std::string removable =
+        readFile(
+            "/sys/block/" +
+            device.name +
+            "/removable");
+
+    if(device.name.rfind("sd",0) == 0)
     {
+        if(removable == "1")
+        {
+            device.type =
+                DeviceType::USB;
+
+            return;
+        }
+
         if(rotational == "0")
-            device.type = DeviceType::SATA_SSD;
+        {
+            device.type =
+                DeviceType::SATA_SSD;
+        }
         else
-            device.type = DeviceType::HDD;
+        {
+            device.type =
+                DeviceType::HDD;
+        }
 
         return;
     }
 
-    device.type = DeviceType::UNKNOWN;
+    device.type =
+        DeviceType::UNKNOWN;
 }
